@@ -1,0 +1,21 @@
+{
+    "identifier": "org.JumpList",
+    "name": "Jump List",
+    "organization": "MyOrganization",
+    "description": "Lorem ipsum, dolor sit amet.",
+    "version": "1.0",
+    "categories": [],
+    "sidebars": [
+        {
+            "id": "viewfromthesky.jumplist",
+            "name": "Jump List",
+            "sections": [
+                {
+                    "id": "viewfromthesky.jumplist.jumps",
+                    "name": "Jumps",
+                    "allowMultiple": false
+                }
+            ]
+        }
+    ]
+}
