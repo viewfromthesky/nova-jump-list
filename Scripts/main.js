@@ -7,6 +7,7 @@ let dataProvider = null;
  * @property {String} fileName - The name of the file + extension related to this jump, without file path.
  * @property {String} filePath - The file's path on disk; for tooltip display.
  * @property {number} lineNumber - The calculated line number based on the range.
+ * @property {String} lineContent - The content of the line the jump targets.
  */
 
  /**
@@ -23,6 +24,7 @@ class Jump {
 	humanReadable = {
 		fileName: "",
 		filePath: "",
+		lineContent: "",
 		lineNumber: 0
 	};
 
@@ -41,6 +43,7 @@ class Jump {
 		this.line = humanReadable.lineNumber;
 		this.humanReadable.fileName = humanReadable.fileName;
 		this.humanReadable.filePath = humanReadable.filePath;
+		this.humanReadable.lineContent = humanReadable.lineContent;
 		this.humanReadable.lineNumber = humanReadable.lineNumber;
 	}
 }
@@ -76,6 +79,8 @@ class JumpDataProvider {
 			const newJumpPosition = this.getJumpListSize();
 			const { line: lineNumber } = calculateLineColumnNumber(editor);
 
+			const lineRange = editor.document.getLineRangeForRange(editor.selectedRange);
+
 			const filePathArray = path.split('/');
 
 			this._jumpList.push(
@@ -85,6 +90,7 @@ class JumpDataProvider {
 							filePathArray.length
 						).join('/'),
 					filePath: path,
+					lineContent: editor.document.getTextInRange(lineRange).trim(),
 					lineNumber
 				})
 			);
@@ -123,13 +129,13 @@ class JumpDataProvider {
 		);
 
 		item.descriptiveText = element.humanReadable.lineNumber;
-		item.tooltip = element.humanReadable.filePath;
+		item.tooltip = element.humanReadable.lineContent;
 		item.command = "goToJump";
 
 		return item;
 	}
 
-	getCurrentPosition(index) {
+	getCurrentPosition() {
 		return this._currentJumpPosition;
 	}
 
@@ -180,6 +186,11 @@ exports.activate = function() {
 //
 // }
 
+/**
+ * Go to a specified jump. If the jumpIndex is out of range, then the request will do nothing.
+ *
+ * @param {number} jumpIndex - The index (position in the list) of the jump to go to.
+ */
 function goToJump(jumpIndex) {
 	const jump = dataProvider.getJump(jumpIndex);
 
