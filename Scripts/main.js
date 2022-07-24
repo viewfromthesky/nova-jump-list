@@ -8,11 +8,17 @@ let dataProvider = null;
  * @property {number} lineNumber - The calculated line number based on the range.
  */
 
+ /**
+  * @typedef {Object} EditorCursorPosition
+  * @property {Number} line - The line number at the current cursor position.
+  * @property {Number} column - The column number at the current cursor position.
+  */
+
 class Jump {
-	_documentURI;
-	_rangeStart;
-	_position;
-	_humanReadable = {
+	documentURI;
+	rangeStart;
+	position;
+	humanReadable = {
 		fileName: "",
 		lineNumber: 0
 	};
@@ -26,23 +32,11 @@ class Jump {
 	 * @param {HumanReadableJumpData} humanReadable - Some human readable data for display within the jump list.
 	 */
 	constructor(uri, rangeStart, position, humanReadable) {
-		this._documentURI = uri;
-		this._rangeStart = rangeStart;
-		this._position = position;
-		this._humanReadable.fileName = humanReadable.fileName;
-		this._humanReadable.lineNumber = humanReadable.lineNumber;
-	}
-
-	getHumanReadableData() {
-		return this._humanReadable;
-	}
-
-	getDocumentURI() {
-		return this._documentURI;
-	}
-
-	getRangeStart() {
-		return this._rangeStart;
+		this.documentURI = uri;
+		this.rangeStart = rangeStart;
+		this.position = position;
+		this.humanReadable.fileName = humanReadable.fileName;
+		this.humanReadable.lineNumber = humanReadable.lineNumber;
 	}
 }
 
@@ -58,20 +52,26 @@ class JumpDataProvider {
 	/**
 	 * Add a new jump to the list.
 	 *
-	 * @param {string} uri - The URI of the document that was jumped to.
-	 * @param {number} rangeStart - The exact numeric position of the cursor within the document.
+	 * @param {TextEditor} editor
 	 */
-	addToJumpList(uri, rangeStart) {
-		const newJumpPosition = this.getJumpListSize();
+	addToJumpList(editor) {
+		if(!editor || !(editor instanceof TextEditor)) return;
 
-		this._jumpList.push(
-			new Jump(uri, rangeStart, newJumpPosition, {
-				fileName: "test file name.ts",
-				lineNumber: 5
-			})
-		);
+		const { document: { uri }, selectedRange: { start: rangeStart }} = editor;
 
-		this._currentJumpPosition = newJumpPosition;
+		if(uri && rangeStart) {
+			const newJumpPosition = this.getJumpListSize();
+			const { line: lineNumber } = calculateLineColumnNumber(editor);
+
+			this._jumpList.push(
+				new Jump(uri, rangeStart, newJumpPosition, {
+					fileName: "test file name.ts",
+					lineNumber
+				})
+			);
+
+			this._currentJumpPosition = newJumpPosition;
+		}
 	}
 
 	getJumpListSize() {
@@ -92,13 +92,32 @@ class JumpDataProvider {
 	 * @param {Jump} element - The jump to retrieve
 	 */
 	getTreeItem(element) {
-		let item = new TreeItem(element.getHumanReadableData().fileName, TreeItemCollapsibleState.None);
+		let item = new TreeItem(element.humanReadable.fileName, TreeItemCollapsibleState.None);
 
-		item.descriptiveText = element.getHumanReadableData().lineNumber;
-		item.tooltip = `${element.getDocumentURI()}:${element.getRangeStart()}`;
+		item.descriptiveText = element.humanReadable.lineNumber;
+		item.tooltip = `${element.documentURI}:${element.rangeStart}`;
+		item.command = "goToJump";
 
 		return item;
 	}
+}
+
+/**
+ * Get line number and column number for selected range.
+ *
+ * @param {TextEditor} editor - The relevant text editor.
+ * @returns {EditorCursorPosition}
+ */
+function calculateLineColumnNumber(editor) {
+	const { document: { eol }, selectedRange } = editor;
+	const editorContentRange = new Range(0, selectedRange.end);
+	const editorContent = editor.getTextInRange(editorContentRange);
+	const editorLines = editorContent.split(eol);
+
+	return {
+		line: editorLines.length,
+		column: 0
+	};
 }
 
 exports.activate = function() {
@@ -108,16 +127,10 @@ exports.activate = function() {
 		dataProvider
 	});
 
-	dataProvider.addToJumpList(
-		nova.workspace.activeTextEditor.document.uri,
-		nova.workspace.activeTextEditor.selectedRange.start
-	);
+	dataProvider.addToJumpList(nova.workspace.activeTextEditor);
 
 	nova.workspace.onDidAddTextEditor((editor) => {
-		dataProvider.addToJumpList(
-			editor.document.uri,
-			editor.selectedRange.start
-		);
+		dataProvider.addToJumpList(editor);
 
 		treeView.reload();
 	});
@@ -128,3 +141,20 @@ exports.activate = function() {
 // exports.deactivate = function() {
 //
 // }
+
+nova.commands.register("goToJump", (_) => {
+	/** @type {Array<Jump>} */
+	const [jump] = treeView.selection;
+
+	const availableTextEditor = nova.workspace.textEditors.find((textEditor) => {
+		console.log(textEditor.document.uri);
+		console.log(jump);
+		return textEditor.document.uri === jump.documentURI;
+	});
+
+	if(availableTextEditor) {
+		availableTextEditor.selectedRange.start = new Range(jump.rangeStart, jump.rangeStart);
+	} else {
+		nova.workspace.openFile(jump.documentURI);
+	}
+})
