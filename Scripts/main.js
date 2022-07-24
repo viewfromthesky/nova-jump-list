@@ -1,6 +1,8 @@
 let treeView = null;
 /** @type {JumpDataProvider} */
 let dataProvider = null;
+/** @type {CompositeDisposable} */
+let disposables = null;
 
 /**
  * @typedef {Object} HumanReadableJumpData
@@ -76,7 +78,15 @@ class JumpDataProvider {
 		} = editor;
 
 		if(uri && rangeStart && path) {
-			const newJumpPosition = this.getJumpListSize();
+			const newJumpPosition = this.getCurrentPosition() + 1;
+
+			if(
+				this.getJumpListSize() > newJumpPosition ||
+				!!this.getJump(newJumpPosition)
+			) {
+				// clear the jump list ahead of this jump before continuing
+				this._jumpList = this._jumpList.slice(0, this._currentJumpPosition);
+			}
 			const { line: lineNumber } = calculateLineColumnNumber(editor);
 
 			const lineRange = editor.document.getLineRangeForRange(editor.selectedRange);
@@ -132,6 +142,9 @@ class JumpDataProvider {
 		item.tooltip = element.humanReadable.lineContent;
 		item.command = "goToJump";
 		item.identifier = element.position;
+		if(element.position === this._currentJumpPosition) {
+			item.image = "__builtin.next";
+		}
 
 		return item;
 	}
@@ -184,7 +197,9 @@ exports.activate = function() {
 		dataProvider
 	});
 
-	nova.workspace.onDidAddTextEditor((editor) => {
+	disposables = new CompositeDisposable();
+
+	disposables.add(nova.workspace.onDidAddTextEditor((editor) => {
 		// Don't add new jumps while moving through the list
 		if(dataProvider.getCurrentPosition() >= dataProvider.getJumpListSize() - 1) {
 			dataProvider.addToJumpList(editor);
@@ -192,8 +207,8 @@ exports.activate = function() {
 			treeView.reload();
 		}
 
-		nova.workspace.activeTextEditor.onDidChangeSelection((editor) => {
-			// const { document: { uri: newURI } } = editor;
+		// For each new active text editor, add the onDidChangeSelection listener
+		disposables.add(nova.workspace.activeTextEditor?.onDidChangeSelection((editor) => {
 			const { line: newLine } = calculateLineColumnNumber(editor);
 			const { line: currentLine } = dataProvider.getCurrentJump();
 
@@ -206,15 +221,15 @@ exports.activate = function() {
 
 				treeView.reload();
 			}
-		});
-	});
+		}));
+	}));
 
 	nova.subscriptions.add(treeView);
 }
 
-// exports.deactivate = function() {
-//
-// }
+exports.deactivate = function() {
+	disposables?.clear();
+}
 
 /**
  * Go to a specified jump. If the jumpIndex is out of range, then the request will do nothing.
@@ -233,6 +248,8 @@ function goToJump(jumpIndex) {
 				line: jump.line
 			}
 		);
+
+		treeView.reload();
 	}
 }
 
