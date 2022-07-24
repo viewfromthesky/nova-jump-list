@@ -17,6 +17,7 @@ let dataProvider = null;
 class Jump {
 	documentURI;
 	rangeStart;
+	line;
 	position;
 	humanReadable = {
 		fileName: "",
@@ -35,6 +36,7 @@ class Jump {
 		this.documentURI = uri;
 		this.rangeStart = rangeStart;
 		this.position = position;
+		this.line = humanReadable.lineNumber;
 		this.humanReadable.fileName = humanReadable.fileName;
 		this.humanReadable.lineNumber = humanReadable.lineNumber;
 	}
@@ -87,7 +89,7 @@ class JumpDataProvider {
 	}
 
 	/**
-	 * summary
+	 * Get a jump to add to the TreeView.
 	 *
 	 * @param {Jump} element - The jump to retrieve
 	 */
@@ -127,8 +129,6 @@ exports.activate = function() {
 		dataProvider
 	});
 
-	dataProvider.addToJumpList(nova.workspace.activeTextEditor);
-
 	nova.workspace.onDidAddTextEditor((editor) => {
 		dataProvider.addToJumpList(editor);
 
@@ -146,15 +146,10 @@ nova.commands.register("goToJump", (_) => {
 	/** @type {Array<Jump>} */
 	const [jump] = treeView.selection;
 
-	const availableTextEditor = nova.workspace.textEditors.find((textEditor) => {
-		console.log(textEditor.document.uri);
-		console.log(jump);
-		return textEditor.document.uri === jump.documentURI;
-	});
-
-	if(availableTextEditor) {
-		availableTextEditor.selectedRange.start = new Range(jump.rangeStart, jump.rangeStart);
-	} else {
-		nova.workspace.openFile(jump.documentURI);
-	}
+	nova.workspace.openFile(
+		jump.documentURI,
+		{
+			line: jump.line
+		}
+	);
 })
