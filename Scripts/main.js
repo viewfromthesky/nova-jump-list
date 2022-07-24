@@ -1,6 +1,10 @@
 const { Jump } = require('./Jump');
 const { JumpDataProvider } = require('./JumpDataProvider');
-const { calculateLineColumnNumber, goToJump } = require('./helpers');
+const {
+  calculateLineColumnNumber,
+  goToJump,
+  reservedKeywords
+} = require('./helpers');
 
 let treeView = null;
 /** @type {JumpDataProvider} */
@@ -31,17 +35,29 @@ exports.activate = function() {
     disposables.add(nova.workspace.activeTextEditor?.onDidChangeSelection(
       (editor) => {
         const { line: newLine } = calculateLineColumnNumber(editor);
+        const newLineRange = editor.document.getLineRangeForRange(editor.selectedRange);
+        const newLineContent = editor.document.getTextInRange(newLineRange).trim();
 
         let objection = false;
+        const currentJump = dataProvider.getCurrentJump();
 
-        if(dataProvider.getCurrentJump()) {
-          const { line: currentLine } = dataProvider.getCurrentJump();
+        // If the new line contains with a significant reserved word, accept it anyway
+        if(currentJump) {
+          const { line: currentLine } = currentJump;
 
           const lineDifference = (currentLine - newLine) < 0 ?
             newLine - currentLine :
             currentLine - newLine;
 
-          if(lineDifference < 30) {
+          if(lineDifference > 0) {
+            if(lineDifference < 30) {
+              objection = true;
+            }
+
+            if(newLineContent.match(reservedKeywords)) {
+              objection = false;
+            }
+          } else {
             objection = true;
           }
         }

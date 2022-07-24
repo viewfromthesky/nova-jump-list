@@ -24,6 +24,8 @@ function calculateLineColumnNumber(editor) {
 /**
  * Go to a specified jump. If the jumpIndex is out of range, then the request will do nothing.
  * @param {number} jumpIndex - The index (position in the list) of the jump to go to.
+ * @param {JumpDataProvider} dataProvider - The root data provider for the treeView.
+ * @param {TreeView} treeView - The root TreeView instance powering the sidebar; required to reload when jumping so that the cursor follows the jump in use.
  */
 function goToJump(jumpIndex, dataProvider, treeView) {
   const jump = dataProvider.getJump(jumpIndex);
@@ -42,7 +44,10 @@ function goToJump(jumpIndex, dataProvider, treeView) {
   }
 }
 
+const reservedKeywords = new RegExp("(function|class|interface)");
+
 module.exports = {
   calculateLineColumnNumber,
-  goToJump
+  goToJump,
+  reservedKeywords
 };
