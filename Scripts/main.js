@@ -9,71 +9,75 @@ let dataProvider = null;
 let disposables = null;
 
 exports.activate = function() {
-	dataProvider = new JumpDataProvider();
+  dataProvider = new JumpDataProvider();
 
-	treeView = new TreeView("viewfromthesky.jumplist.jumps", {
-		dataProvider
-	});
+  treeView = new TreeView("viewfromthesky.jumplist.jumps", {
+    dataProvider
+  });
 
-	disposables = new CompositeDisposable();
+  disposables = new CompositeDisposable();
 
-	disposables.add(nova.workspace.onDidAddTextEditor((editor) => {
-		// Don't add new jumps while moving through the list
-		if(dataProvider.getCurrentPosition() >= dataProvider.getJumpListSize() - 1) {
-			dataProvider.addToJumpList(editor);
+  disposables.add(nova.workspace.onDidAddTextEditor((editor) => {
+    // Don't add new jumps while moving through the list
+    if(
+      dataProvider.getCurrentPosition() >= dataProvider.getJumpListSize() - 1
+    ) {
+      dataProvider.addToJumpList(editor);
 
-			treeView.reload();
-		}
+      treeView.reload();
+    }
 
-		// For each new active text editor, add the onDidChangeSelection listener
-		disposables.add(nova.workspace.activeTextEditor?.onDidChangeSelection((editor) => {
-			const { line: newLine } = calculateLineColumnNumber(editor);
+    // For each new active text editor, add the onDidChangeSelection listener
+    disposables.add(nova.workspace.activeTextEditor?.onDidChangeSelection(
+      (editor) => {
+        const { line: newLine } = calculateLineColumnNumber(editor);
 
-			let objection = false;
+        let objection = false;
 
-			if(dataProvider.getCurrentJump()) {
-				const { line: currentLine }  = dataProvider.getCurrentJump();
+        if(dataProvider.getCurrentJump()) {
+          const { line: currentLine } = dataProvider.getCurrentJump();
 
-				const lineDifference = (currentLine - newLine) < 0 ?
-					newLine - currentLine :
-					currentLine - newLine;
+          const lineDifference = (currentLine - newLine) < 0 ?
+            newLine - currentLine :
+            currentLine - newLine;
 
-				if(lineDifference < 30) {
-					objection = true;
-				}
-			}
+          if(lineDifference < 30) {
+            objection = true;
+          }
+        }
 
-			if(!objection) {
-				dataProvider.addToJumpList(editor);
+        if(!objection) {
+          dataProvider.addToJumpList(editor);
 
-				treeView.reload();
-			}
-		}));
-	}));
+          treeView.reload();
+        }
+      }
+    ));
+  }));
 
-	nova.subscriptions.add(treeView);
+  nova.subscriptions.add(treeView);
 }
 
 exports.deactivate = function() {
-	disposables?.clear();
+  disposables?.clear();
 }
 
 nova.commands.register("goToJump", (_) => {
-	/** @type {Array<Jump>} */
-	const [jump] = treeView.selection;
+  /** @type {Array<Jump>} */
+  const [jump] = treeView.selection;
 
-	goToJump(jump.position, dataProvider, treeView);
+  goToJump(jump.position, dataProvider, treeView);
 });
 
 nova.commands.register("jumpBackwards", (_) => {
-	goToJump(dataProvider.getCurrentPosition() - 1, dataProvider, treeView);
+  goToJump(dataProvider.getCurrentPosition() - 1, dataProvider, treeView);
 });
 
 nova.commands.register("jumpForwards", (_) => {
-	goToJump(dataProvider.getCurrentPosition() + 1, dataProvider, treeView);
+  goToJump(dataProvider.getCurrentPosition() + 1, dataProvider, treeView);
 });
 
 nova.commands.register("clearJumpList", (_) => {
-	dataProvider.emptyJumpList();
-	treeView.reload();
+  dataProvider.emptyJumpList();
+  treeView.reload();
 });

@@ -10,15 +10,15 @@
  * @returns {EditorCursorPosition}
  */
 function calculateLineColumnNumber(editor) {
-	const { document: { eol }, selectedRange } = editor;
-	const editorContentRange = new Range(0, selectedRange.end);
-	const editorContent = editor.getTextInRange(editorContentRange);
-	const editorLines = editorContent.split(eol);
+  const { document: { eol }, selectedRange } = editor;
+  const editorContentRange = new Range(0, selectedRange.end);
+  const editorContent = editor.getTextInRange(editorContentRange);
+  const editorLines = editorContent.split(eol);
 
-	return {
-		line: editorLines.length,
-		column: 0
-	};
+  return {
+    line: editorLines.length,
+    column: 0
+  };
 }
 
 /**
@@ -26,23 +26,23 @@ function calculateLineColumnNumber(editor) {
  * @param {number} jumpIndex - The index (position in the list) of the jump to go to.
  */
 function goToJump(jumpIndex, dataProvider, treeView) {
-	const jump = dataProvider.getJump(jumpIndex);
+  const jump = dataProvider.getJump(jumpIndex);
 
-	if(jump) {
-		dataProvider.setCurrentPosition(jumpIndex);
+  if(jump) {
+    dataProvider.setCurrentPosition(jumpIndex);
 
-		nova.workspace.openFile(
-			jump.documentURI,
-			{
-				line: jump.line
-			}
-		);
+    nova.workspace.openFile(
+      jump.documentURI,
+      {
+        line: jump.line
+      }
+    );
 
-		treeView.reload();
-	}
+    treeView.reload();
+  }
 }
 
 module.exports = {
-	calculateLineColumnNumber,
-	goToJump
+  calculateLineColumnNumber,
+  goToJump
 };
