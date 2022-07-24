@@ -9,6 +9,8 @@
         {
             "id": "viewfromthesky.jumplist",
             "name": "Jump List",
+            "smallImage": "sidebar-icon-small",
+            "smallSelectedImage": "sidebar-icon-small-selected",
             "largeImage": "sidebar-icon-large",
             "largeSelectedImage": "sidebar-icon-large-selected",
             "sections": [
