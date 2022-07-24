@@ -59,7 +59,14 @@ class JumpDataProvider {
 	addToJumpList(editor) {
 		if(!editor || !(editor instanceof TextEditor)) return;
 
-		const { document: { uri }, selectedRange: { start: rangeStart }} = editor;
+		const {
+			document: {
+				uri
+			},
+			selectedRange: {
+				start: rangeStart
+			}
+		} = editor;
 
 		if(uri && rangeStart) {
 			const newJumpPosition = this.getJumpListSize();
@@ -94,7 +101,10 @@ class JumpDataProvider {
 	 * @param {Jump} element - The jump to retrieve
 	 */
 	getTreeItem(element) {
-		let item = new TreeItem(element.humanReadable.fileName, TreeItemCollapsibleState.None);
+		let item = new TreeItem(
+			element.humanReadable.fileName,
+			TreeItemCollapsibleState.None
+		);
 
 		item.descriptiveText = element.humanReadable.lineNumber;
 		item.tooltip = `${element.documentURI}:${element.rangeStart}`;
