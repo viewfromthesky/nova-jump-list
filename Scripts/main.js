@@ -75,7 +75,7 @@ class JumpDataProvider {
 			}
 		} = editor;
 
-		if(uri && rangeStart) {
+		if(uri && rangeStart && path) {
 			const newJumpPosition = this.getJumpListSize();
 			const { line: lineNumber } = calculateLineColumnNumber(editor);
 
@@ -131,6 +131,7 @@ class JumpDataProvider {
 		item.descriptiveText = element.humanReadable.lineNumber;
 		item.tooltip = element.humanReadable.lineContent;
 		item.command = "goToJump";
+		item.identifier = element.position;
 
 		return item;
 	}
@@ -145,6 +146,16 @@ class JumpDataProvider {
 
 	getJump(index) {
 		return this._jumpList.find((jump) => jump.position === index);
+	}
+
+	/**
+	 * Get the currently selected jump.
+	 * @returns {Jump}
+	 */
+	getCurrentJump() {
+		return this._jumpList.find(
+			(jump) => jump.position === this._currentJumpPosition
+		);
 	}
 }
 
@@ -174,9 +185,28 @@ exports.activate = function() {
 	});
 
 	nova.workspace.onDidAddTextEditor((editor) => {
-		dataProvider.addToJumpList(editor);
+		// Don't add new jumps while moving through the list
+		if(dataProvider.getCurrentPosition() >= dataProvider.getJumpListSize() - 1) {
+			dataProvider.addToJumpList(editor);
 
-		treeView.reload();
+			treeView.reload();
+		}
+
+		nova.workspace.activeTextEditor.onDidChangeSelection((editor) => {
+			// const { document: { uri: newURI } } = editor;
+			const { line: newLine } = calculateLineColumnNumber(editor);
+			const { line: currentLine } = dataProvider.getCurrentJump();
+
+			const lineDifference = (currentLine - newLine) < 0 ?
+				newLine - currentLine :
+				currentLine - newLine;
+
+			if(lineDifference > 29) {
+				dataProvider.addToJumpList(editor);
+
+				treeView.reload();
+			}
+		});
 	});
 
 	nova.subscriptions.add(treeView);
