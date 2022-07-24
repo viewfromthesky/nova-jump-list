@@ -26,13 +26,10 @@ class JumpDataProvider {
 			document: {
 				uri,
 				path
-			},
-			selectedRange: {
-				start: rangeStart
 			}
 		} = editor;
 
-		if(uri && rangeStart && path) {
+		if(uri && path) {
 			const newJumpPosition = this.getCurrentPosition() + 1;
 
 			if(
@@ -42,22 +39,26 @@ class JumpDataProvider {
 				// clear the jump list ahead of this jump before continuing
 				this.emptyJumpList(this._currentJumpPosition);
 			}
-			const { line: lineNumber } = calculateLineColumnNumber(editor);
+			const { line } = calculateLineColumnNumber(editor);
 
 			const lineRange = editor.document.getLineRangeForRange(editor.selectedRange);
 
 			const filePathArray = path.split('/');
 
 			this._jumpList.push(
-				new Jump(uri, rangeStart, newJumpPosition, {
-					fileName: filePathArray.slice(
-							filePathArray.length - 2,
-							filePathArray.length
-						).join('/'),
-					filePath: path,
-					lineContent: editor.document.getTextInRange(lineRange).trim(),
-					lineNumber
-				})
+				new Jump(
+					uri,
+					line,
+					newJumpPosition,
+					{
+						fileName: filePathArray.slice(
+								filePathArray.length - 2,
+								filePathArray.length
+							).join('/'),
+						filePath: path,
+						lineContent: editor.document.getTextInRange(lineRange).trim()
+					}
+				)
 			);
 
 			this._currentJumpPosition = newJumpPosition;
@@ -95,7 +96,7 @@ class JumpDataProvider {
 			TreeItemCollapsibleState.None
 		);
 
-		item.descriptiveText = element.humanReadable.lineNumber;
+		item.descriptiveText = element.line;
 		item.tooltip = element.humanReadable.lineContent;
 		item.command = "goToJump";
 		item.identifier = element.position;
