@@ -170,6 +170,11 @@ class JumpDataProvider {
 			(jump) => jump.position === this._currentJumpPosition
 		);
 	}
+
+	emptyJumpList() {
+		this._jumpList = [];
+		this._currentJumpPosition = -1;
+	}
 }
 
 /**
@@ -210,13 +215,22 @@ exports.activate = function() {
 		// For each new active text editor, add the onDidChangeSelection listener
 		disposables.add(nova.workspace.activeTextEditor?.onDidChangeSelection((editor) => {
 			const { line: newLine } = calculateLineColumnNumber(editor);
-			const { line: currentLine } = dataProvider.getCurrentJump();
 
-			const lineDifference = (currentLine - newLine) < 0 ?
-				newLine - currentLine :
-				currentLine - newLine;
+			let objection = false;
 
-			if(lineDifference > 29) {
+			if(dataProvider.getCurrentJump()) {
+				const { line: currentLine }  = dataProvider.getCurrentJump();
+
+				const lineDifference = (currentLine - newLine) < 0 ?
+					newLine - currentLine :
+					currentLine - newLine;
+
+				if(lineDifference < 30) {
+					objection = true;
+				}
+			}
+
+			if(!objection) {
 				dataProvider.addToJumpList(editor);
 
 				treeView.reload();
@@ -266,4 +280,9 @@ nova.commands.register("jumpBackwards", (_) => {
 
 nova.commands.register("jumpForwards", (_) => {
 	goToJump(dataProvider.getCurrentPosition() + 1);
+});
+
+nova.commands.register("clearJumpList", (_) => {
+	dataProvider.emptyJumpList();
+	treeView.reload();
 });
