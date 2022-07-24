@@ -97,6 +97,12 @@ class JumpDataProvider {
 		return this._jumpList.length;
 	}
 
+	/**
+	 * Get TreeItem children. Root element is always null, this TreeView doesn't support nesting.
+	 *
+	 * @param {Object} element
+	 * @returns {Array<Jump>}
+	 */
 	getChildren(element) {
 		if(element === null) {
 			return this._jumpList;
@@ -121,6 +127,18 @@ class JumpDataProvider {
 		item.command = "goToJump";
 
 		return item;
+	}
+
+	getCurrentPosition(index) {
+		return this._currentJumpPosition;
+	}
+
+	setCurrentPosition(index) {
+		this._currentJumpPosition = index;
+	}
+
+	getJump(index) {
+		return this._jumpList.find((jump) => jump.position === index);
 	}
 }
 
@@ -162,14 +180,32 @@ exports.activate = function() {
 //
 // }
 
+function goToJump(jumpIndex) {
+	const jump = dataProvider.getJump(jumpIndex);
+
+	if(jump) {
+		dataProvider.setCurrentPosition(jumpIndex);
+
+		nova.workspace.openFile(
+			jump.documentURI,
+			{
+				line: jump.line
+			}
+		);
+	}
+}
+
 nova.commands.register("goToJump", (_) => {
 	/** @type {Array<Jump>} */
 	const [jump] = treeView.selection;
 
-	nova.workspace.openFile(
-		jump.documentURI,
-		{
-			line: jump.line
-		}
-	);
-})
+	goToJump(jump.position);
+});
+
+nova.commands.register("jumpBackwards", (_) => {
+	goToJump(dataProvider.getCurrentPosition() - 1);
+});
+
+nova.commands.register("jumpForwards", (_) => {
+	goToJump(dataProvider.getCurrentPosition() + 1);
+});

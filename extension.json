@@ -18,5 +18,21 @@
             ]
         }
     ],
+    "commands": {
+        "editor": [
+            {
+                "title": "Jump backwards",
+                "command": "jumpBackwards",
+                "shortcut": "cmd-ctrl-,",
+                "when": "editorHasFocus"
+            },
+            {
+                "title": "Jump forwards",
+                "command": "jumpForwards",
+                "shortcut": "cmd-ctrl-.",
+                "when": "editorHasFocus"
+            }
+        ]
+    },
     "main": "main.js"
 }
