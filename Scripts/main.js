@@ -32,7 +32,6 @@ class Jump {
 
 	/**
 	 * Construct a Jump.
-	 *
 	 * @param {string} uri - The URI for the related document so we can find/compare against open editors.
 	 * @param {number} rangeStart - The exact cursor position within the document.
 	 * @param {number} position - The position of this jump within the list.
@@ -51,7 +50,9 @@ class Jump {
 }
 
 class JumpDataProvider {
+	/** An array containing all available jumps. */
 	_jumpList;
+	/** The current of the jump currently in use. */
 	_currentJumpPosition;
 
 	constructor() {
@@ -61,8 +62,7 @@ class JumpDataProvider {
 
 	/**
 	 * Add a new jump to the list.
-	 *
-	 * @param {TextEditor} editor
+	 * @param {TextEditor} editor - The editor instance to take the jump from.
 	 */
 	addToJumpList(editor) {
 		if(!editor || !(editor instanceof TextEditor)) return;
@@ -85,7 +85,7 @@ class JumpDataProvider {
 				!!this.getJump(newJumpPosition)
 			) {
 				// clear the jump list ahead of this jump before continuing
-				this._jumpList = this._jumpList.slice(0, this._currentJumpPosition);
+				this.emptyJumpList(this._currentJumpPosition);
 			}
 			const { line: lineNumber } = calculateLineColumnNumber(editor);
 
@@ -109,13 +109,16 @@ class JumpDataProvider {
 		}
 	}
 
+	/**
+	 * The length of the jump list.
+	 * @returns {number}
+	 */
 	getJumpListSize() {
 		return this._jumpList.length;
 	}
 
 	/**
 	 * Get TreeItem children. Root element is always null, this TreeView doesn't support nesting.
-	 *
 	 * @param {Object} element
 	 * @returns {Array<Jump>}
 	 */
@@ -129,7 +132,6 @@ class JumpDataProvider {
 
 	/**
 	 * Get a jump to add to the TreeView.
-	 *
 	 * @param {Jump} element - The jump to retrieve
 	 */
 	getTreeItem(element) {
@@ -149,16 +151,28 @@ class JumpDataProvider {
 		return item;
 	}
 
+	/**
+	 * Get the current jump in use.
+	 * @returns {number}
+	 */
 	getCurrentPosition() {
 		return this._currentJumpPosition;
 	}
 
-	setCurrentPosition(index) {
-		this._currentJumpPosition = index;
+	/**
+	 * Set the jump currently in use.
+	 * @param {number} jumpIndex - The index of the jump you wish to set as current.
+	 */
+	setCurrentPosition(jumpIndex) {
+		this._currentJumpPosition = jumpIndex;
 	}
 
-	getJump(index) {
-		return this._jumpList.find((jump) => jump.position === index);
+	/**
+	 * Get a specific jump from the list.
+	 * @param {number} jumpIndex - The position of the jump in the list to get.
+	 */
+	getJump(jumpIndex) {
+		return this._jumpList.find((jump) => jump.position === jumpIndex);
 	}
 
 	/**
@@ -171,16 +185,27 @@ class JumpDataProvider {
 		);
 	}
 
-	emptyJumpList() {
-		this._jumpList = [];
-		this._currentJumpPosition = -1;
+	/**
+	 * Empty out all or part of the jump list.
+	 * @param {Number} jumpIndex - The jump index to start from; if provided, any jumps more recent than the identified jump will be removed from the list. If not provided, the list is emptied completely.
+	 */
+	emptyJumpList(jumpIndex) {
+		if(jumpIndex) {
+			this._jumpList = this._jumpList.slice(0, jumpIndex);
+
+			if(jumpIndex < this._currentJumpPosition) {
+				this._currentJumpPosition = jumpIndex;
+			}
+		} else {
+			this._jumpList = [];
+			this._currentJumpPosition = -1;
+		}
 	}
 }
 
 /**
  * Get line number and column number for selected range.
- *
- * @param {TextEditor} editor - The relevant text editor.
+ * @param {TextEditor} editor - The editor session to retrieve a cursor position from.
  * @returns {EditorCursorPosition}
  */
 function calculateLineColumnNumber(editor) {
@@ -247,13 +272,13 @@ exports.deactivate = function() {
 
 /**
  * Go to a specified jump. If the jumpIndex is out of range, then the request will do nothing.
- *
  * @param {number} jumpIndex - The index (position in the list) of the jump to go to.
  */
 function goToJump(jumpIndex) {
 	const jump = dataProvider.getJump(jumpIndex);
 
 	if(jump) {
+
 		dataProvider.setCurrentPosition(jumpIndex);
 
 		nova.workspace.openFile(

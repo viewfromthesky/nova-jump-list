@@ -21,9 +21,7 @@
                     "headerCommands": [
                         {
                             "command": "clearJumpList",
-                            "image": "__builtin.remove",
-                            "paletteTitle": "Clear Jump List",
-                            "title": "Clear Jump List",
+                            "title": "Clear",
                             "tooltip": "Clears all entries from the jump list; a full reset."
                         }
                     ]
