@@ -1,10 +1,12 @@
 {
-    "identifier": "org.JumpList",
+    "identifier": "org.viewfromthesky.JumpList",
     "name": "Jump List",
-    "organization": "MyOrganization",
-    "description": "Lorem ipsum, dolor sit amet.",
+    "organization": "viewfromthesky",
+    "description": "A jump list for the Nova editor, aiming to remember useful navigation points as you edit your code.",
     "version": "1.0",
-    "categories": [],
+    "categories": ["commands", "sidebars"],
+    "repository": "https://github.com/viewfromthesky/nova-jump-list",
+    "bugs": "https://github.com/viewfromthesky/nova-jump-list/issues",
     "sidebars": [
         {
             "id": "viewfromthesky.jumplist",
