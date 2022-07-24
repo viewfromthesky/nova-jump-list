@@ -5,6 +5,7 @@ let dataProvider = null;
 /**
  * @typedef {Object} HumanReadableJumpData
  * @property {String} fileName - The name of the file + extension related to this jump, without file path.
+ * @property {String} filePath - The file's path on disk; for tooltip display.
  * @property {number} lineNumber - The calculated line number based on the range.
  */
 
@@ -21,6 +22,7 @@ class Jump {
 	position;
 	humanReadable = {
 		fileName: "",
+		filePath: "",
 		lineNumber: 0
 	};
 
@@ -38,6 +40,7 @@ class Jump {
 		this.position = position;
 		this.line = humanReadable.lineNumber;
 		this.humanReadable.fileName = humanReadable.fileName;
+		this.humanReadable.filePath = humanReadable.filePath;
 		this.humanReadable.lineNumber = humanReadable.lineNumber;
 	}
 }
@@ -61,7 +64,8 @@ class JumpDataProvider {
 
 		const {
 			document: {
-				uri
+				uri,
+				path
 			},
 			selectedRange: {
 				start: rangeStart
@@ -72,9 +76,15 @@ class JumpDataProvider {
 			const newJumpPosition = this.getJumpListSize();
 			const { line: lineNumber } = calculateLineColumnNumber(editor);
 
+			const filePathArray = path.split('/');
+
 			this._jumpList.push(
 				new Jump(uri, rangeStart, newJumpPosition, {
-					fileName: "test file name.ts",
+					fileName: filePathArray.slice(
+							filePathArray.length - 2,
+							filePathArray.length
+						).join('/'),
+					filePath: path,
 					lineNumber
 				})
 			);
@@ -107,7 +117,7 @@ class JumpDataProvider {
 		);
 
 		item.descriptiveText = element.humanReadable.lineNumber;
-		item.tooltip = `${element.documentURI}:${element.rangeStart}`;
+		item.tooltip = element.humanReadable.filePath;
 		item.command = "goToJump";
 
 		return item;
