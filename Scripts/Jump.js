@@ -17,6 +17,7 @@ class Jump {
 
   /**
    * Construct a Jump.
+   *
    * @param {string} uri - The URI for the related document so we can find/compare against open editors.
    * @param {number} line - The line number where the jump occurred.
    * @param {number} position - The position of this jump within the list.

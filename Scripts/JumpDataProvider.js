@@ -17,6 +17,7 @@ class JumpDataProvider {
 
   /**
    * Add a new jump to the list.
+   *
    * @param {TextEditor} editor - The editor instance to take the jump from.
    */
   addToJumpList(editor) {
@@ -67,6 +68,7 @@ class JumpDataProvider {
 
   /**
    * The length of the jump list.
+   *
    * @returns {number}
    */
   getJumpListSize() {
@@ -75,6 +77,7 @@ class JumpDataProvider {
 
   /**
    * Get TreeItem children. Root element is always null, this TreeView doesn't support nesting.
+   *
    * @param {Object} element
    * @returns {Array<Jump>}
    */
@@ -88,6 +91,7 @@ class JumpDataProvider {
 
   /**
    * Get a jump to add to the TreeView.
+   *
    * @param {Jump} element - The jump to retrieve
    */
   getTreeItem(element) {

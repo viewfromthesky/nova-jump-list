@@ -13,4 +13,6 @@ Each time a new file is opened, the extension *aims* to add this to the jump lis
     * `interface`
     * `class`
 
-This has been developed with JavaScript/TypeScript in mind so far, and more reserved words will need to be added.
+Languages with tailored support:
+* JavaScript
+* TypeScript
