@@ -14,7 +14,3 @@ Each time a new file is opened, the extension *aims* to add this to the jump lis
 		* `class`
 
 This has been developed with JavaScript/TypeScript in mind so far, and more reserved words will need to be added.
-
-## Planned features
-- [ ] Preferences for tooltip content; line content (current default) or full file path
-- [ ] Broader reserved word support for creating useful jumps
