@@ -1,3 +1,4 @@
+![Jump List](./extension@4x.png "Jump List")
 # Jump List for Nova
 
 Other editors have jump lists. Nova didn't. Until now.
