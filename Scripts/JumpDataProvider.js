@@ -1,5 +1,5 @@
 const { Jump } = require('./Jump');
-const { calculateLineColumnNumber } = require('./helpers');
+const { calculateLineColumnNumber, getConfigItem } = require('./helpers');
 
 /**
  * The data provider for this extension's tree view. Extensions have been added to manage the jump list as that data is all contained here.
@@ -97,7 +97,7 @@ class JumpDataProvider {
     );
 
     item.descriptiveText = element.line;
-    item.tooltip = element.humanReadable.lineContent;
+    item.tooltip = element.humanReadable[getConfigItem("jumpList.tooltip.content")];
     item.command = "goToJump";
     item.identifier = element.position;
     if(element.position === this._currentJumpPosition) {

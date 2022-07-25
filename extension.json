@@ -47,5 +47,18 @@
             }
         ]
     },
+    "config": [
+        {
+            "key": "jumpList.tooltip.content",
+            "type": "enum",
+            "required": true,
+            "default": "lineContent",
+            "title": "Tooltip content",
+            "values": [
+                ["lineContent", "Content available at the jump"],
+                ["filePath", "Full file path"]
+            ]
+        }
+    ],
     "main": "main.js"
 }

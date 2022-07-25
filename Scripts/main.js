@@ -21,6 +21,14 @@ exports.activate = function() {
 
   disposables = new CompositeDisposable();
 
+  disposables.add(nova.config.onDidChange("jumpList.tooltip.content", (_) => {
+    treeView.reload();
+  }));
+
+  disposables.add(nova.workspace.config.onDidChange("jumpList.tooltip.content", (_) => {
+    treeView.reload();
+  }));
+
   disposables.add(nova.workspace.onDidAddTextEditor((editor) => {
     // Don't add new jumps while moving through the list
     if(
@@ -75,7 +83,7 @@ exports.activate = function() {
 }
 
 exports.deactivate = function() {
-  disposables?.clear();
+  disposables.dispose();
 }
 
 nova.commands.register("goToJump", (_) => {

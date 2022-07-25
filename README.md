@@ -10,7 +10,7 @@ Each time a new file is opened, the extension *aims* to add this to the jump lis
 * Moving the cursor at least 30 lines away from the last jump counts
 * Moving the cursor to a line including the following reserved keywords counts:
     * `function`
-		* `interface`
-		* `class`
+    * `interface`
+    * `class`
 
 This has been developed with JavaScript/TypeScript in mind so far, and more reserved words will need to be added.

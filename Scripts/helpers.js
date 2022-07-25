@@ -44,10 +44,19 @@ function goToJump(jumpIndex, dataProvider, treeView) {
   }
 }
 
+function getConfigItem(key, coerce) {
+  if(nova.workspace.config.get(key)) {
+    return nova.workspace.config.get(key, coerce);
+  }
+
+  return nova.config.get(key, coerce);
+}
+
 const reservedKeywords = new RegExp("(function|class|interface)");
 
 module.exports = {
   calculateLineColumnNumber,
   goToJump,
-  reservedKeywords
+  reservedKeywords,
+  getConfigItem
 };
