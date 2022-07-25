@@ -3,7 +3,7 @@
     "name": "Jump List",
     "organization": "viewfromthesky",
     "description": "A jump list for the Nova editor, aiming to remember useful navigation points as you edit your code.",
-    "version": "1.0",
+    "version": "0.1",
     "categories": ["commands", "sidebars"],
     "repository": "https://github.com/viewfromthesky/nova-jump-list",
     "bugs": "https://github.com/viewfromthesky/nova-jump-list/issues",
